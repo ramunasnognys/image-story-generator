@@ -53,35 +53,62 @@ def short_story_generation(client, image_description):
         print(f"Error in short_story_generation: {str(e)}")
         raise
 
-class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        data = json.loads(post_data.decode('utf-8'))
+def handler(event, context):
+    try:
+        # Parse the incoming JSON body
+        body = json.loads(event['body'])
+        base64_image = body.get('image')
 
-        if not data or 'image' not in data:
-            self.send_error(400, 'No image data provided')
-            return
-
-        base64_image = data['image']
         if not base64_image:
-            self.send_error(400, 'Empty image data')
-            return
-
-        try:
-            prompt = 'Describe this image.'
-            image_description = image_to_text(client, llava_model, base64_image, prompt)
-            story = short_story_generation(client, image_description)
-
-            response = {
-                'description': image_description,
-                'storyTitle': 'The Adventure Begins',
-                'story': story
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'No image data provided'})
             }
 
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(response).encode('utf-8'))
-        except Exception as e:
-            self.send_error(500, str(e))
+        prompt = 'Describe this image.'
+        image_description = image_to_text(client, llava_model, base64_image, prompt)
+        story = short_story_generation(client, image_description)
+
+        response = {
+            'description': image_description,
+            'storyTitle': 'The Adventure Begins',
+            'story': story
+        }
+
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',  # Adjust this for production
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
+            },
+            'body': json.dumps(response)
+        }
+    except Exception as e:
+        print(f"Error in handler: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',  # Adjust this for production
+            },
+            'body': json.dumps({'error': str(e)})
+        }
+
+# This is to handle CORS preflight requests
+def handle_options(event, context):
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Origin': '*',  # Adjust this for production
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS'
+        }
+    }
+
+# Main entry point for Vercel
+def main(event, context):
+    if event['httpMethod'] == 'OPTIONS':
+        return handle_options(event, context)
+    return handler(event, context)
