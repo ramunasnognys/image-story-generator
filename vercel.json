@@ -1,7 +1,11 @@
 {
     "version": 2,
     "builds": [
-      { "src": "frontend/**", "use": "@vercel/next" },
+      { 
+        "src": "frontend/package.json",
+        "use": "@vercel/next",
+        "config": { "outputDirectory": "frontend/.next" }
+      },
       { "src": "api/**/*.py", "use": "@vercel/python" }
     ],
     "routes": [
