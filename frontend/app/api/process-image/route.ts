@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('Sending request to backend...')
-    const response = await fetch('http://localhost:5000/process-image', {
+    const response = await fetch('/api/process_image', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
