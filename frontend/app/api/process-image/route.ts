@@ -4,6 +4,11 @@ const API_URL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:5000' 
   : '/api';
 
+/**
+ * Handles POST requests to process an image.
+ * @param {NextRequest} req - The incoming request object containing the image data.
+ * @returns {NextResponse} JSON response with processed data or error message.
+ */
 export async function POST(req: NextRequest) {
   try {
     const { image } = await req.json();

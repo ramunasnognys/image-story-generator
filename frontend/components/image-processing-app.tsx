@@ -6,6 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Upload, Image as ImageIcon, FileText } from "lucide-react"
 
+/**
+ * ImageProcessingApp component for uploading, processing, and displaying images with generated descriptions and stories.
+ * @returns {JSX.Element} A React component that renders the image processing application interface.
+ */
 export function ImageProcessingApp() {
   const [image, setImage] = useState<string | null>(null)
   const [description, setDescription] = useState('')
@@ -15,15 +19,30 @@ export function ImageProcessingApp() {
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  /**
+   * Handles the upload of an image file.
+   * @param {React.ChangeEvent<HTMLInputElement>} event - The event object from the file input change.
+   * @returns {void} This function doesn't return a value, but sets the image state.
+   */
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       const reader = new FileReader()
+      /**
+       * Handles the onload event of a FileReader, setting the image state with the loaded file content
+       * @param {ProgressEvent<FileReader>} e - The event object containing the loaded file data
+       * @returns {void} This function does not return a value
+       */
       reader.onload = (e) => setImage(e.target?.result as string)
       reader.readAsDataURL(file)
     }
   }
 
+  /**
+   * Processes an uploaded image by sending it to the server and updating the state with the received data.
+   * @param {void} - This function doesn't take any parameters directly, but relies on the 'image' state.
+   * @returns {Promise<void>} This function doesn't return a value, but updates several state variables.
+   */
   const handleProcessImage = async () => {
     if (!image) return
 
@@ -55,6 +74,10 @@ export function ImageProcessingApp() {
     }
   }
 
+  /**
+   * Triggers a click event on the hidden file input element
+   * @returns {void} This function doesn't return anything
+   */
   const triggerFileInput = () => {
     fileInputRef.current?.click()
   }
